@@ -1,0 +1,37 @@
+name: microservice-poc
+
+services:
+  ms-product:
+    build:
+      context: ../ms-product
+    container_name: ms-product
+    ports:
+      - "8001:8001"
+    volumes:
+      - ../ms-product/data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/healthz', timeout=3)"]
+      interval: 5s
+      timeout: 4s
+      retries: 12
+      start_period: 10s
+
+  ms-order:
+    build:
+      context: ../ms-order
+    container_name: ms-order
+    ports:
+      - "8002:8002"
+    environment:
+      PRODUCT_API_URL: "http://ms-product:8001"
+    volumes:
+      - ../ms-order/data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8002/healthz', timeout=3)"]
+      interval: 5s
+      timeout: 4s
+      retries: 12
+      start_period: 10s
+    depends_on:
+      ms-product:
+        condition: service_healthy

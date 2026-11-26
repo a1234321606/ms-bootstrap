@@ -1,0 +1,75 @@
+{
+  "info": {
+    "name": "microservice-poc",
+    "description": "微服務授課 hands-on collection。\n前置：在 ms-bootstrap 執行 `docker compose up -d`。\n流程：建商品(ms-product)→ 下單(ms-order，跨服務 HTTP 取價)→ 查訂單。",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "product_base", "value": "http://localhost:8001" },
+    { "key": "order_base", "value": "http://localhost:8002" },
+    { "key": "product_id", "value": "" },
+    { "key": "order_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "ms-product (8001)",
+      "item": [
+        {
+          "name": "01 Health check",
+          "request": { "method": "GET", "url": { "raw": "{{product_base}}/healthz", "host": ["{{product_base}}"], "path": ["healthz"] } },
+          "response": []
+        },
+        {
+          "name": "02 Create product",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"機械式鍵盤\",\n  \"price\": 350\n}" },
+            "url": { "raw": "{{product_base}}/products", "host": ["{{product_base}}"], "path": ["products"] }
+          },
+          "response": []
+        },
+        {
+          "name": "03 Get product by id",
+          "request": { "method": "GET", "url": { "raw": "{{product_base}}/products/{{product_id}}", "host": ["{{product_base}}"], "path": ["products", "{{product_id}}"] } },
+          "response": []
+        },
+        {
+          "name": "04 List products",
+          "request": { "method": "GET", "url": { "raw": "{{product_base}}/products", "host": ["{{product_base}}"], "path": ["products"] } },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ms-order (8002)",
+      "item": [
+        {
+          "name": "05 Health check",
+          "request": { "method": "GET", "url": { "raw": "{{order_base}}/healthz", "host": ["{{order_base}}"], "path": ["healthz"] } },
+          "response": []
+        },
+        {
+          "name": "06 Create order(價格由 ms-product 決定)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"customer_name\": \"Alice\",\n  \"lines\": [\n    { \"product_id\": \"填入 02 回傳的 product_id\", \"quantity\": 2 }\n  ]\n}" },
+            "url": { "raw": "{{order_base}}/orders", "host": ["{{order_base}}"], "path": ["orders"] }
+          },
+          "response": []
+        },
+        {
+          "name": "07 Get order by id",
+          "request": { "method": "GET", "url": { "raw": "{{order_base}}/orders/{{order_id}}", "host": ["{{order_base}}"], "path": ["orders", "{{order_id}}"] } },
+          "response": []
+        },
+        {
+          "name": "08 List orders",
+          "request": { "method": "GET", "url": { "raw": "{{order_base}}/orders", "host": ["{{order_base}}"], "path": ["orders"] } },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
